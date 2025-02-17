@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.example.restapi.entity.JobApplication;
+import com.example.restapi.entity.JobApplication.ApplicationStatus;
 
 public class JobApplicationRequest {
   @NotBlank
@@ -15,7 +16,7 @@ public class JobApplicationRequest {
 
   private String jobDescription;
   private String jobUrl;
-  private JobApplication.ApplicationStatus status;
+  private ApplicationStatus status;
 
   private String resumeUrl;
   private LocalDateTime applicationDate;
