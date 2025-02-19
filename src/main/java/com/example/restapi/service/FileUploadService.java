@@ -20,38 +20,37 @@ import java.util.UUID;
 @Service
 public class FileUploadService {
 
- @Autowired
- private S3Client s3Client;
+  @Autowired
+  private S3Client s3Client;
 
- @Autowired
- private UserRepository userRepository;
+  @Autowired
+  private UserRepository userRepository;
+  @Value("${aws.s3.bucket}")
+  private String bucketName;
 
- @Value("${aws.s3.bucket}")
- private String bucketName;
+  private User getCurrentUser() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String username = authentication.getName();
+    return userRepository.findByUsername(username)
+        .orElseThrow(() -> new RuntimeException("User not found"));
+  }
 
- private User getCurrentUser() {
-  Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-  String username = authentication.getName();
-  return userRepository.findByUsername(username)
-    .orElseThrow(() -> new RuntimeException("User not found"));
- }
+  public String uploadResume(MultipartFile file) throws IOException {
+    User currentUser = getCurrentUser();
+    String fileName = generateUniqueFileName(currentUser.getUsername(), file.getOriginalFilename());
 
- public String uploadResume(MultipartFile file) throws IOException {
-  User currentUser = getCurrentUser();
-  String fileName = generateUniqueFileName(currentUser.getUsername(), file.getOriginalFilename());
+    PutObjectRequest request = PutObjectRequest.builder()
+        .bucket(bucketName)
+        .key(fileName)
+        .contentType(file.getContentType())
+        .build();
 
-  PutObjectRequest request = PutObjectRequest.builder()
-    .bucket(bucketName)
-    .key(fileName)
-    .contentType(file.getContentType())
-    .build();
+    s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
 
-  s3Client.putObject(request, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
+    return fileName;
+  }
 
-  return fileName;
- }
-
- private String generateUniqueFileName(String username, String originalFileName) {
-  return "resumes/" + username + "/" + UUID.randomUUID() + "_" + originalFileName;
- }
+  private String generateUniqueFileName(String username, String originalFileName) {
+    return "resumes/" + username + "/" + UUID.randomUUID() + "_" + originalFileName;
+  }
 }

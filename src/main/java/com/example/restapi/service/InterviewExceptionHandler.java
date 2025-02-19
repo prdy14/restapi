@@ -22,6 +22,7 @@ public class InterviewExceptionHandler {
  @ExceptionHandler(Exception.class)
  public ResponseEntity<Map<String, String>> handleGeneralException(Exception ex) {
   Map<String, String> response = new HashMap<>();
+  System.out.println(ex);
   response.put("error", "An unexpected error 1 occurred");
   return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
  }

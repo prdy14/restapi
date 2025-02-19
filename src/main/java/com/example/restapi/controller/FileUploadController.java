@@ -21,6 +21,7 @@ public class FileUploadController {
 
  @PostMapping("/upload-resume")
  public ResponseEntity<?> uploadResume(@RequestParam("file") MultipartFile file) {
+  System.out.println(file);
   try {
    String fileUrl = fileUploadService.uploadResume(file);
    return ResponseEntity.ok(fileUrl);
